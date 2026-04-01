@@ -100,10 +100,6 @@
         {
             "type": "custom",
             "format": " "
-        },
-        {
-            "type": "custom",
-            "format": " "
         }
     ]
 }
