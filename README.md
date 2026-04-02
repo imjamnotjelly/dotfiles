@@ -4,10 +4,13 @@ macos pretty mode 🌹
 
 ### showcase
 
-| | |
-|:---:|:---:|
-| <img src="Pictures/screenshots/showcase/1.png" width="100%"> | <img src="Pictures/screenshots/showcase/2.png" width="100%"> |
-| <img src="Pictures/screenshots/showcase/3.png" width="100%"> | <img src="Pictures/screenshots/showcase/4.png" width="100%"> |
+<p align="center">
+  <img src="Pictures/screenshots/showcase/1.png" width="45%">
+  <img src="Pictures/screenshots/showcase/2.png" width="45%">
+  <br>
+  <img src="Pictures/screenshots/showcase/3.png" width="45%">
+  <img src="Pictures/screenshots/showcase/4.png" width="45%">
+</p>
 
 ### installation
 install yadm if you have
