@@ -10,11 +10,11 @@ macos pretty mode 🌹
 </div>
 
 ### installation
-1. install yadm
+1\. install yadm
 ```bash
 brew install yadm
 ```
-2. clone the repo
+2\. clone the repo
 ```bash
 yadm clone https://github.com/imjamnotjelly/dotfiles
 ```
