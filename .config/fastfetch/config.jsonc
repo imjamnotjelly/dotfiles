@@ -73,7 +73,7 @@
         {
             "type": "command",
             "key": "{#35}│{#}  upt      ",
-            "text": "uptime | awk -F'(up |[,])' '{if ($2 ~ /day/) {print $2 $3} else {print $2}}' | sed 's/ mins/m/; s/  / /g' | awk '{gsub(/:/, \"h \"); if ($0 !~ /m/) $0=$0\"m\"} {printf \"%17s\", $0}'",
+            "text": "uptime | awk -F'(up |[,])' '{if ($2 ~ /day/) {val=$2 $3} else {val=$2}; gsub(/ days? ?/, \"d \", val); gsub(/:/, \"h \", val); if (val !~ /m/) val=val\"m\"; printf \"%17s\", val}'",
             "format": "{1} {#35}│"
         },
         {
