@@ -4,7 +4,7 @@ source "$CONFIG_DIR/colors.sh"
 sketchybar --add event aerospace_workspace_change
 
 sketchybar --bar \
-  height=32 \
+  height=33 \
   position=top \
   padding_left=15 \
   padding_right=15 \
