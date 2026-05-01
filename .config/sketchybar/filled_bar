@@ -1,0 +1,111 @@
+#!/bin/bash
+source "$CONFIG_DIR/colors.sh"
+
+sketchybar --add event aerospace_workspace_change
+
+sketchybar --bar \
+  height=33 \
+  position=top \
+  padding_left=15 \
+  padding_right=15 \
+  margin=0 \
+  corner_radius=0 \
+  blur_radius=30 \
+  color=$BAR_COLOR
+
+sketchybar --default \
+  icon.font="JetBrainsMono Nerd Font:Bold:12.0" \
+  icon.color=$ACCENT_COLOR \
+  label.font="JetBrainsMono Nerd Font:Bold:12.0" \
+  label.color=$TEXT_COLOR \
+  icon.padding_left=4 \
+  icon.padding_right=4 \
+  label.padding_left=4 \
+  label.padding_right=12
+
+for i in 1 2 3 4 5 6; do
+  sketchybar --add item space.$i left \
+    --set space.$i \
+      label="$i" \
+      click_script="aerospace workspace $i" \
+      icon.drawing=off \
+      width=32 \
+      align=center \
+      background.drawing=off \
+      label.padding_right=0 \
+      label.padding_left=0
+done
+
+sketchybar --set space.1 \
+  background.drawing=on \
+  background.color=$LOVE \
+  background.corner_radius=6 \
+  background.height=24 \
+  background.width=32
+
+sketchybar --add item space.tracker left \
+  --set space.tracker \
+    drawing=off \
+  --subscribe space.tracker aerospace_workspace_change \
+  --set space.tracker script="
+ITEM_WIDTH=32
+OFFSET=\$(( (\$FOCUSED_WORKSPACE - 1) * ITEM_WIDTH ))
+sketchybar --animate tanh 20 --set space.1 background.x_offset=\$OFFSET
+for i in 1 2 3 4 5 6; do
+  if [ \"\$i\" = \"\$FOCUSED_WORKSPACE\" ]; then
+    sketchybar --animate tanh 20 --set space.\$i label.color=$BAR_COLOR
+  else
+    sketchybar --animate tanh 20 --set space.\$i label.color=$TEXT_COLOR
+  fi
+done
+"
+
+sketchybar --add item clock right \
+  --set clock \
+    update_freq=10 \
+    icon="󱑂" \
+    script="sketchybar --set \$NAME label=\"\$(date '+%I:%M %p')\""
+
+sketchybar --add item date right \
+  --set date \
+    update_freq=3600 \
+    icon="󰃭" \
+    script="sketchybar --set \$NAME label=\"\$(date '+%a, %d %b')\""
+
+sketchybar --add item battery right \
+  --set battery \
+    update_freq=60 \
+    script="$CONFIG_DIR/plugins/battery.sh"
+
+sketchybar --add item spotify right \
+  --set spotify \
+    update_freq=3 \
+    icon.font="JetBrainsMono Nerd Font:Bold:15.0" \
+    subscribe spotify mouse.clicked \
+    click_script="osascript -e 'tell application \"Spotify\" to playpause'" \
+    script="
+      if pgrep -x \"Spotify\" > /dev/null; then
+        PLAYER_STATE=\$(osascript -e 'tell application \"Spotify\" to player state as string' 2>/dev/null)
+        if [ \"\$PLAYER_STATE\" = \"playing\" ] || [ \"\$PLAYER_STATE\" = \"paused\" ]; then
+          TRACK=\$(osascript -e 'tell application \"Spotify\" to name of current track')
+          ARTIST=\$(osascript -e 'tell application \"Spotify\" to artist of current track')
+          
+          # Combine artist and track
+          FULL_LABEL=\"\$ARTIST - \$TRACK\"
+          
+          # Truncate at 40 chars: if longer, take 37 chars + '...'
+          DISPLAY_LABEL=\$(echo \"\$FULL_LABEL\" | awk '{ if (length(\$0) > 43) print substr(\$0, 1, 40) \"...\"; else print \$0 }')
+          
+          # Set icon based on state
+          ICON=\"󰐊\"
+          [ \"\$PLAYER_STATE\" = \"playing\" ] && ICON=\"󰏤\"
+          
+          sketchybar --set \$NAME icon=\"\$ICON\" label=\"\$DISPLAY_LABEL\" drawing=on
+        else
+          sketchybar --set \$NAME drawing=off
+        fi
+      else
+        sketchybar --set \$NAME drawing=off
+      fi"
+
+sketchybar --update

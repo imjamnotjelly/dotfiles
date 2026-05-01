@@ -1,0 +1,200 @@
+#!/bin/bash
+source "$CONFIG_DIR/colors.sh"
+
+sketchybar --add event aerospace_workspace_change
+
+sketchybar --bar \
+  height=38 \
+  position=top \
+  padding_left=9 \
+  padding_right=5 \
+  margin=0 \
+  corner_radius=0 \
+  blur_radius=0 \
+  color=0x00000000
+
+# === Defaults ===
+sketchybar --default \
+  icon.font="JetBrainsMono Nerd Font:Bold:11.0" \
+  icon.color=$ACCENT_COLOR \
+  label.font="JetBrainsMono Nerd Font:Bold:11.0" \
+  label.color=$TEXT_COLOR \
+  background.height=26 \
+  background.corner_radius=13 \
+  background.color=$BAR_COLOR \
+  icon.padding_left=10 \
+  icon.padding_right=4 \
+  label.padding_left=4 \
+  label.padding_right=10 \
+  padding_left=4 \
+  padding_right=4
+
+# === Left spacer ===
+sketchybar --add item space.padleft left \
+  --set space.padleft \
+    drawing=on \
+    width=2 \
+    padding_left=0 \
+    padding_right=0 \
+    icon.drawing=off \
+    label.drawing=off \
+    background.drawing=off
+
+# === Workspace dots: ring + fill stacked ===
+# WIDTH=12 pulls them tighter than the 14px font size
+SPACE_WIDTH=12
+
+for i in 1 2 3 4 5 6; do
+  sketchybar --add item space.$i left \
+    --set space.$i \
+      icon="○" \
+      icon.font="JetBrainsMono Nerd Font:Bold:14.0" \
+      icon.color=$LOVE \
+      icon.y_offset=1 \
+      label.drawing=off \
+      width=$SPACE_WIDTH \
+      align=center \
+      background.drawing=off \
+      padding_left=0 \
+      padding_right=0 \
+      click_script="aerospace workspace $i"
+
+  sketchybar --add item space.$i.fill left \
+    --set space.$i.fill \
+      icon="●" \
+      icon.font="JetBrainsMono Nerd Font:Bold:14.0" \
+      icon.color=0x00eb6f92 \
+      icon.y_offset=1 \
+      label.drawing=off \
+      width=$SPACE_WIDTH \
+      align=center \
+      background.drawing=off \
+      padding_left=-$SPACE_WIDTH \
+      padding_right=0 \
+      click_script="aerospace workspace $i"
+done
+
+# === Right spacer ===
+sketchybar --add item space.padright left \
+  --set space.padright \
+    drawing=on \
+    icon.drawing=off \
+    label.drawing=off \
+    background.drawing=off \
+    width=6 \
+    padding_left=0 \
+    padding_right=0
+
+sketchybar --set space.1.fill icon.color=0xffeb6f92
+
+# Bracket
+sketchybar --add bracket workspaces \
+  space.padleft \
+  space.1 space.1.fill \
+  space.2 space.2.fill \
+  space.3 space.3.fill \
+  space.4 space.4.fill \
+  space.5 space.5.fill \
+  space.6 space.6.fill \
+  space.padright \
+  --set workspaces \
+    background.drawing=on \
+    background.color=$BAR_COLOR \
+    background.corner_radius=13 \
+    background.height=26 \
+    background.border_color=$ACCENT_LIGHT \
+    background.border_width=1
+
+# Tracker
+sketchybar --add item space.tracker left \
+  --set space.tracker drawing=off \
+  --subscribe space.tracker aerospace_workspace_change \
+  --set space.tracker script="
+PREV_FILE=/tmp/sketchybar_prev_workspace
+PREV=\$(cat \"\$PREV_FILE\" 2>/dev/null || echo \"\")
+
+if [ -n \"\$PREV\" ] && [ \"\$PREV\" != \"\$FOCUSED_WORKSPACE\" ]; then
+  sketchybar --animate tanh 20 --set space.\$PREV.fill icon.color=0x00eb6f92
+fi
+
+sketchybar --animate tanh 20 --set space.\$FOCUSED_WORKSPACE.fill icon.color=0xffeb6f92
+
+echo \"\$FOCUSED_WORKSPACE\" > \"\$PREV_FILE\"
+"
+
+# === Right side ===
+sketchybar --add item clock right \
+  --set clock \
+    update_freq=10 \
+    icon="󱑂" \
+    background.drawing=on \
+    background.color=$BAR_COLOR \
+    background.corner_radius=13 \
+    background.height=26 \
+    background.border_color=$ACCENT_LIGHT \
+    background.border_width=1 \
+    script="sketchybar --set \$NAME label=\"\$(date '+%I:%M %p')\""
+
+sketchybar --add item date right \
+  --set date \
+    update_freq=3600 \
+    icon="󰃭" \
+    background.drawing=on \
+    background.color=$BAR_COLOR \
+    background.corner_radius=13 \
+    background.height=26 \
+    background.border_color=$ACCENT_LIGHT \
+    background.border_width=1 \
+    script="sketchybar --set \$NAME label=\"\$(date '+%a, %d %b')\""
+
+sketchybar --add item battery right \
+  --set battery \
+    update_freq=60 \
+    background.drawing=on \
+    background.color=$BAR_COLOR \
+    background.corner_radius=13 \
+    background.height=26 \
+    background.border_color=$ACCENT_LIGHT \
+    background.border_width=1 \
+    script="$CONFIG_DIR/plugins/battery.sh"
+
+sketchybar --add item spotify right \
+  --set spotify \
+    update_freq=3 \
+    icon.font="JetBrainsMono Nerd Font:Bold:13.0" \
+    background.drawing=on \
+    background.color=$BAR_COLOR \
+    background.corner_radius=13 \
+    background.height=26 \
+    background.border_color=$ACCENT_LIGHT \
+    background.border_width=1 \
+    click_script="osascript -e 'tell application \"Spotify\" to playpause'" \
+    script="
+if pgrep -x \"Spotify\" > /dev/null; then
+  PLAYER_STATE=\$(osascript -e 'tell application \"Spotify\" to player state as string' 2>/dev/null)
+  if [ \"\$PLAYER_STATE\" = \"playing\" ] || [ \"\$PLAYER_STATE\" = \"paused\" ]; then
+    TRACK=\$(osascript -e 'tell application \"Spotify\" to name of current track')
+    ARTIST=\$(osascript -e 'tell application \"Spotify\" to artist of current track')
+    FULL_LABEL=\"\$ARTIST - \$TRACK\"
+    DISPLAY_LABEL=\$(echo \"\$FULL_LABEL\" | awk '{ if (length(\$0) > 43) print substr(\$0, 1, 40) \"...\"; else print \$0 }')
+    ICON=\"󰐊\"
+    [ \"\$PLAYER_STATE\" = \"playing\" ] && ICON=\"󰏤\"
+    sketchybar --set \$NAME icon=\"\$ICON\" label=\"\$DISPLAY_LABEL\" drawing=on
+  else
+    sketchybar --set \$NAME drawing=off
+  fi
+else
+  sketchybar --set \$NAME drawing=off
+fi"
+
+sketchybar --update
+
+FOCUSED=$(aerospace list-workspaces --focused 2>/dev/null || echo "1")
+for i in 1 2 3 4 5 6; do
+  if [ "$i" = "$FOCUSED" ]; then
+    sketchybar --set space.$i.fill icon.color=0xffeb6f92
+  else
+    sketchybar --set space.$i.fill icon.color=0x00eb6f92
+  fi
+done
+echo "$FOCUSED" > /tmp/sketchybar_prev_workspace
