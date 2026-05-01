@@ -1,5 +1,5 @@
 #!/bin/bash
 
-SELECTED_CONFIG="pilled_bar"
+SELECTED_CONFIG="pilled"
 
-source "$CONFIG_DIR/$SELECTED_CONFIG"
+source "$CONFIG_DIR/bars/$SELECTED_CONFIG"
