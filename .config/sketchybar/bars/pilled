@@ -3,6 +3,8 @@ source "$CONFIG_DIR/colors.sh"
 
 sketchybar --add event aerospace_workspace_change
 
+GAP=3
+
 sketchybar --bar \
   height=38 \
   position=top \
@@ -41,7 +43,6 @@ sketchybar --add item space.padleft left \
     background.drawing=off
 
 # === Workspace dots: ring + fill stacked ===
-# WIDTH=12 pulls them tighter than the 14px font size
 SPACE_WIDTH=12
 
 for i in 1 2 3 4 5 6; do
@@ -74,7 +75,7 @@ for i in 1 2 3 4 5 6; do
       click_script="aerospace workspace $i"
 done
 
-# === Right spacer ===
+# === Right spacer (inside workspaces bracket) ===
 sketchybar --add item space.padright left \
   --set space.padright \
     drawing=on \
@@ -86,6 +87,23 @@ sketchybar --add item space.padright left \
     padding_right=0
 
 sketchybar --set space.1.fill icon.color=0xffeb6f92
+
+# === Focused app pill ===
+sketchybar --add item front_app left \
+  --set front_app \
+    icon.drawing=off \
+    padding_left=$((GAP*2)) \
+    padding_right=$GAP \
+    label.padding_left=10 \
+    label.padding_right=10 \
+    background.drawing=on \
+    background.color=$BAR_COLOR \
+    background.corner_radius=13 \
+    background.height=26 \
+    background.border_color=$ACCENT_LIGHT \
+    background.border_width=1 \
+    script="sketchybar --set \$NAME label=\"\$(echo \"\$INFO\" | tr '[:upper:]' '[:lower:]')\"" \
+  --subscribe front_app front_app_switched
 
 # Bracket
 sketchybar --add bracket workspaces \
@@ -127,6 +145,8 @@ sketchybar --add item clock right \
   --set clock \
     update_freq=10 \
     icon="󱑂" \
+    padding_left=$GAP \
+    padding_right=$GAP \
     background.drawing=on \
     background.color=$BAR_COLOR \
     background.corner_radius=13 \
@@ -139,17 +159,21 @@ sketchybar --add item date right \
   --set date \
     update_freq=3600 \
     icon="󰃭" \
+    padding_left=$GAP \
+    padding_right=$GAP \
     background.drawing=on \
     background.color=$BAR_COLOR \
     background.corner_radius=13 \
     background.height=26 \
     background.border_color=$ACCENT_LIGHT \
     background.border_width=1 \
-    script="sketchybar --set \$NAME label=\"\$(date '+%a, %d %b')\""
+    script="sketchybar --set \$NAME label=\"\$(date '+%a, %b %d' | tr '[:upper:]' '[:lower:]')\""
 
 sketchybar --add item battery right \
   --set battery \
     update_freq=60 \
+    padding_left=$GAP \
+    padding_right=$GAP \
     background.drawing=on \
     background.color=$BAR_COLOR \
     background.corner_radius=13 \
@@ -162,6 +186,8 @@ sketchybar --add item spotify right \
   --set spotify \
     update_freq=3 \
     icon.font="JetBrainsMono Nerd Font:Bold:13.0" \
+    padding_left=$GAP \
+    padding_right=$GAP \
     background.drawing=on \
     background.color=$BAR_COLOR \
     background.corner_radius=13 \

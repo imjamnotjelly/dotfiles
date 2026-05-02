@@ -4,7 +4,7 @@ source "$CONFIG_DIR/colors.sh"
 sketchybar --add event aerospace_workspace_change
 
 sketchybar --bar \
-  height=33 \
+  height=34 \
   position=top \
   padding_left=15 \
   padding_right=15 \
@@ -70,7 +70,7 @@ sketchybar --add item date right \
   --set date \
     update_freq=3600 \
     icon="󰃭" \
-    script="sketchybar --set \$NAME label=\"\$(date '+%a, %d %b')\""
+    script="sketchybar --set \$NAME label=\"\$(date '+%a, %b %d' | tr '[:upper:]' '[:lower:]')\""
 
 sketchybar --add item battery right \
   --set battery \
@@ -84,28 +84,24 @@ sketchybar --add item spotify right \
     subscribe spotify mouse.clicked \
     click_script="osascript -e 'tell application \"Spotify\" to playpause'" \
     script="
-      if pgrep -x \"Spotify\" > /dev/null; then
-        PLAYER_STATE=\$(osascript -e 'tell application \"Spotify\" to player state as string' 2>/dev/null)
-        if [ \"\$PLAYER_STATE\" = \"playing\" ] || [ \"\$PLAYER_STATE\" = \"paused\" ]; then
-          TRACK=\$(osascript -e 'tell application \"Spotify\" to name of current track')
-          ARTIST=\$(osascript -e 'tell application \"Spotify\" to artist of current track')
-          
-          # Combine artist and track
-          FULL_LABEL=\"\$ARTIST - \$TRACK\"
-          
-          # Truncate at 40 chars: if longer, take 37 chars + '...'
-          DISPLAY_LABEL=\$(echo \"\$FULL_LABEL\" | awk '{ if (length(\$0) > 43) print substr(\$0, 1, 40) \"...\"; else print \$0 }')
-          
-          # Set icon based on state
-          ICON=\"󰐊\"
-          [ \"\$PLAYER_STATE\" = \"playing\" ] && ICON=\"󰏤\"
-          
-          sketchybar --set \$NAME icon=\"\$ICON\" label=\"\$DISPLAY_LABEL\" drawing=on
-        else
-          sketchybar --set \$NAME drawing=off
-        fi
-      else
-        sketchybar --set \$NAME drawing=off
-      fi"
+if pgrep -x \"Spotify\" > /dev/null; then
+  PLAYER_STATE=\$(osascript -e 'tell application \"Spotify\" to player state as string' 2>/dev/null)
+  if [ \"\$PLAYER_STATE\" = \"playing\" ] || [ \"\$PLAYER_STATE\" = \"paused\" ]; then
+    TRACK=\$(osascript -e 'tell application \"Spotify\" to name of current track')
+    ARTIST=\$(osascript -e 'tell application \"Spotify\" to artist of current track')
+    # Combine artist and track
+    FULL_LABEL=\"\$ARTIST - \$TRACK\"
+    # Truncate at 40 chars: if longer, take 37 chars + '...'
+    DISPLAY_LABEL=\$(echo \"\$FULL_LABEL\" | awk '{ if (length(\$0) > 43) print substr(\$0, 1, 40) \"...\"; else print \$0 }')
+    # Set icon based on state
+    ICON=\"󰐊\"
+    [ \"\$PLAYER_STATE\" = \"playing\" ] && ICON=\"󰏤\"
+    sketchybar --set \$NAME icon=\"\$ICON\" label=\"\$DISPLAY_LABEL\" drawing=on
+  else
+    sketchybar --set \$NAME drawing=off
+  fi
+else
+  sketchybar --set \$NAME drawing=off
+fi"
 
 sketchybar --update
